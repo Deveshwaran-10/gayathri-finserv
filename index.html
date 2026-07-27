@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gayatri Finserv</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background elements for ambient glow -->
+    <div class="ambient-glow bg-glow-1"></div>
+    <div class="ambient-glow bg-glow-2"></div>
+    <div class="ambient-glow bg-glow-3"></div>
+
+    <div class="app-container">
+        <!-- Toast Notification Area -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <img src="logo.png" alt="GAYATRI FINSERV Logo" class="brand-logo">
+                <div class="header-text">
+                    <h1>GAYATRI FINSERV</h1>
+                    <p>Crypto Investment & Management</p>
+                </div>
+            </div>
+            <div class="header-badge">
+                <span class="pulse-indicator"></span>
+                Local Mode Active
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <button type="button" class="nav-tab active" data-section="investment">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M6 8h12"/><path d="M6 13h6"/><path d="M9 13v8"/><path d="M9 13c0-2 1.5-3 3-3s3 1 3 3"/></svg>
+                INVESTMENT
+            </button>
+            <button type="button" class="nav-tab" data-section="holdings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                HOLDINGS
+            </button>
+        </nav>
+
+        <!-- INVESTMENT Section -->
+        <main class="dashboard-grid app-section" id="section-investment">
+            
+            <!-- Left Side: Member Management & Input -->
+            <section class="panel-column input-column">
+                <div class="card glass-card scroll-reveal">
+                    <div class="card-header">
+                        <div class="card-title-area">
+                            <span class="icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </span>
+                            <div>
+                                <h2>Members & Investments</h2>
+                                <p class="card-subtitle">Manage group shares and individual contributions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-container scrollable-table">
+                            <table id="members-table">
+                                <thead>
+                                    <tr>
+                                        <th>Member</th>
+                                        <th>Investment Amount (INR)</th>
+                                        <th class="col-action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="members-tbody">
+                                    <!-- Dynamic rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="table-actions">
+                            <button type="button" id="btn-add-member" class="btn btn-secondary btn-full">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add New Member
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass-card scroll-reveal">
+                    <div class="card-header">
+                        <div class="card-title-area">
+                            <span class="icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M6 8h12"/><path d="M6 13h6"/><path d="M9 13v8"/><path d="M9 13c0-2 1.5-3 3-3s3 1 3 3"/></svg>
+                            </span>
+                            <div>
+                                <h2>Portfolio Value</h2>
+                                <p class="card-subtitle">Enter the updated valuation of the entire fund</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label for="portfolio-value">Current Portfolio Value (INR)</label>
+                            <div class="input-with-symbol">
+                                <span class="input-symbol">INR</span>
+                                <input type="number" id="portfolio-value" placeholder="Enter total value (e.g. 5300)" step="any" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="btn-calculate" class="btn btn-primary btn-glow">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                Calculate Profit
+                            </button>
+                            <button type="button" id="btn-undo-rollover" class="btn btn-outline hidden">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+                                Undo Rollover
+                            </button>
+                            <button type="button" id="btn-reset" class="btn btn-outline">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                                Reset Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Statistics & Output Calculations -->
+            <section class="panel-column results-column">
+                
+                <!-- Stats Row -->
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <div class="stat-info">
+                            <span class="stat-label">Total Members</span>
+                            <span class="stat-value" id="stat-total-members">-</span>
+                        </div>
+                        <div class="stat-icon-wrapper color-cyan">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-info">
+                            <span class="stat-label">Total Investment</span>
+                            <span class="stat-value text-blue" id="stat-total-investment">-</span>
+                        </div>
+                        <div class="stat-icon-wrapper color-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-info">
+                            <span class="stat-label">Current Portfolio</span>
+                            <span class="stat-value text-purple" id="stat-current-portfolio">-</span>
+                        </div>
+                        <div class="stat-icon-wrapper color-purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M6 8h12"/><path d="M6 13h6"/><path d="M9 13v8"/><path d="M9 13c0-2 1.5-3 3-3s3 1 3 3"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <div class="stat-info">
+                            <span class="stat-label">Total Profit</span>
+                            <span class="stat-value text-green" id="stat-total-profit">-</span>
+                        </div>
+                        <div class="stat-icon-wrapper color-green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-card double-width">
+                        <div class="stat-meta-split">
+                            <div class="stat-meta-item">
+                                <span class="stat-label">Highest Investor</span>
+                                <span class="stat-value text-gold" id="stat-highest-investor">-</span>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-meta-item">
+                                <span class="stat-label">Highest Profit Earner</span>
+                                <span class="stat-value text-pink" id="stat-highest-profit">-</span>
+                            </div>
+                        </div>
+                        <div class="stat-icon-wrapper color-gold">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Details Card -->
+                <div class="card glass-card results-card inactive" id="results-display-card">
+                    <div class="card-header">
+                        <div class="card-title-area">
+                            <span class="icon-wrapper">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </span>
+                            <div>
+                                <h2>Calculated Profit Sharing</h2>
+                                <p class="card-subtitle">Ownership percentages, profits, and new valuations</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Alert about direct calculation -->
+                        <div class="calc-placeholder" id="results-placeholder">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <h3>Awaiting Calculations</h3>
+                            <p>Fill out the investments, enter the current portfolio value, and click "Calculate Profit" to generate distributions.</p>
+                        </div>
+
+                        <div class="results-table-area hidden" id="results-table-area">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Member Name</th>
+                                            <th>Investment</th>
+                                            <th>Ownership %</th>
+                                            <th>Profit Earned</th>
+                                            <th>Final Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="results-tbody">
+                                        <!-- Calculations dynamically added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="results-actions">
+                                <button type="button" id="btn-next-round" class="btn btn-gradient">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                                    Start New Round
+                                </button>
+                                <button type="button" id="btn-export" class="btn btn-secondary">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Export Results (CSV)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- HOLDINGS Section -->
+        <section class="app-section hidden" id="section-holdings">
+            <div class="card glass-card holdings-card">
+                <div class="card-header">
+                    <div class="card-title-area">
+                        <span class="icon-wrapper">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                        </span>
+                        <div>
+                            <h2>Coin Holdings</h2>
+                            <p class="card-subtitle">Track purchased coins, quantities, and total investment value</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-container scrollable-table holdings-table-container">
+                        <table id="holdings-table">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Purchase Date</th>
+                                    <th>Coin Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price (INR)</th>
+                                    <th>Total (INR)</th>
+                                    <th class="col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdings-tbody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                            <tfoot id="holdings-tfoot">
+                                <tr class="holdings-total-row">
+                                    <td colspan="5" class="total-label">Total Portfolio Value</td>
+                                    <td class="total-value" id="holdings-grand-total">INR 0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="table-actions">
+                        <button type="button" id="btn-add-holding" class="btn btn-secondary btn-full">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Add New Coin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="app-footer">
+            <p>GAYATRI FINSERV &bull; Crypto Investment & Management Tool</p>
+        </footer>
+    </div>
+
+    <!-- Modal for adding member -->
+    <div id="modal-container" class="modal-backdrop">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3>Add New Member</h3>
+                <button type="button" id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="new-member-name">Member Name</label>
+                    <input type="text" id="new-member-name" placeholder="Enter name (e.g. Sekar)" maxlength="20">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modal-cancel" class="btn btn-outline">Cancel</button>
+                <button type="button" id="modal-submit" class="btn btn-primary">Add Member</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
