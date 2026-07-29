@@ -524,15 +524,15 @@ function validateInputs() {
         return null;
     }
     
-    if (portfolioValue < totalInvestment) {
-        showToast(`Current portfolio value (${formatCurrency(portfolioValue)}) cannot be less than total investment (${formatCurrency(totalInvestment)}).`, "error");
-        return null;
-    }
-    
-    return {
-        totalInvestment,
-        portfolioValue
-    };
+    if (totalInvestment <= 0) {
+    showToast("Total investment must be greater than INR 0.00 to calculate profit sharing.", "error");
+    return null;
+}
+
+return {
+    totalInvestment,
+    portfolioValue
+};
 }
 
 function calculateProfit() {
