@@ -143,7 +143,7 @@ function init() {
     renderMembersTable();
     updateMembersCountStat();
     renderHoldingsTable();
-    switchSection(state.activeSection, false);
+    switchSection(state.activeSection, false, false);
     
     // If results were previously calculated and stored, display them directly on load
     if (state.results) {
@@ -155,6 +155,17 @@ function init() {
     }
     
     bindEvents();
+    
+    // Initialize premium animations
+    init3DTilt();
+    initButtonRipples();
+    initScrollReveal();
+    initSpotlightTracking();
+    initNavIndicator();
+    initPageEntrance();
+
+    // Auto-fill portfolio value from holdings total on load
+    syncPortfolioFromHoldings(false);
 }
 
 function bindEvents() {
@@ -289,8 +300,10 @@ function renderMembersTable() {
         return;
     }
     
-    state.members.forEach((m) => {
+    state.members.forEach((m, idx) => {
         const tr = document.createElement('tr');
+        tr.classList.add('row-reveal');
+        tr.style.animationDelay = `${Math.min(idx, 10) * 0.05}s`;
         tr.innerHTML = `
             <td class="member-name-cell">${escapeHtml(m.name)}</td>
             <td>
@@ -316,13 +329,16 @@ function renderMembersTable() {
 }
 
 function updateMembersCountStat() {
-    statTotalMembers.textContent = state.members.length;
+    animateCountUpInt(statTotalMembers, state.members.length);
 }
 
 function resetStatsCards() {
     statTotalInvestment.textContent = "-";
+    statTotalInvestment.removeAttribute('data-val');
     statCurrentPortfolio.textContent = "-";
+    statCurrentPortfolio.removeAttribute('data-val');
     statTotalProfit.textContent = "-";
+    statTotalProfit.removeAttribute('data-val');
     statHighestInvestor.textContent = "-";
     statHighestProfit.textContent = "-";
 }
@@ -353,9 +369,9 @@ function restoreStatsCardsFromState() {
         }
     });
     
-    statTotalInvestment.textContent = formatCurrency(totalInvestment);
-    statCurrentPortfolio.textContent = formatCurrency(portfolioValue);
-    statTotalProfit.textContent = formatCurrency(totalProfit);
+    animateCountUp(statTotalInvestment, totalInvestment);
+    animateCountUp(statCurrentPortfolio, portfolioValue);
+    animateCountUp(statTotalProfit, totalProfit);
     
     statHighestInvestor.textContent = highestInvestorAmt > 0 
         ? `${highestInvestorName} (${formatCurrency(highestInvestorAmt)})`
@@ -632,9 +648,9 @@ function calculateProfit() {
     renderResultsViewTable();
     
     // Render Stats panel
-    statTotalInvestment.textContent = formatCurrency(totalInvestment);
-    statCurrentPortfolio.textContent = formatCurrency(portfolioValue);
-    statTotalProfit.textContent = formatCurrency(totalProfit);
+    animateCountUp(statTotalInvestment, totalInvestment);
+    animateCountUp(statCurrentPortfolio, portfolioValue);
+    animateCountUp(statTotalProfit, totalProfit);
     
     statHighestInvestor.textContent = highestInvestorAmt > 0 
         ? `${highestInvestorName} (${formatCurrency(highestInvestorAmt)})`
@@ -648,18 +664,23 @@ function calculateProfit() {
     resultsPlaceholder.classList.add('hidden');
     resultsTableArea.classList.remove('hidden');
     resultsDisplayCard.classList.remove('inactive');
-    
+    resultsDisplayCard.classList.add('results-reveal');
+    triggerSparkleBurst(btnCalculate);
+    setTimeout(() => resultsDisplayCard.classList.remove('results-reveal'), 800);
+
     // Reveal Undo Rollover button
     btnUndoRollover.classList.remove('hidden');
-    
+
     showToast("Calculations completed. Final amounts automatically rolled over as new investment inputs.", "success");
 }
 
 function renderResultsViewTable() {
     resultsTbody.innerHTML = '';
     
-    state.results.forEach(r => {
+    state.results.forEach((r, idx) => {
         const tr = document.createElement('tr');
+        tr.classList.add('row-reveal');
+        tr.style.animationDelay = `${Math.min(idx, 12) * 0.07}s`;
         if (r.profit < 0) {
             tr.classList.add('negative-profit');
         }
@@ -795,15 +816,44 @@ function resetDashboard() {
 // ==========================================================================
 // Navigation
 // ==========================================================================
-function switchSection(section, save = true) {
+function switchSection(section, save = true, animate = true) {
     state.activeSection = section;
 
     navTabs.forEach(tab => {
         tab.classList.toggle('active', tab.dataset.section === section);
     });
+    updateNavIndicator();
 
-    sectionInvestment.classList.toggle('hidden', section !== 'investment');
-    sectionHoldings.classList.toggle('hidden', section !== 'holdings');
+    const outgoing = section === 'investment' ? sectionHoldings : sectionInvestment;
+    const incoming = section === 'investment' ? sectionInvestment : sectionHoldings;
+
+    if (animate && !outgoing.classList.contains('hidden')) {
+        outgoing.classList.add('section-exit');
+        setTimeout(() => {
+            outgoing.classList.add('hidden');
+            outgoing.classList.remove('section-exit');
+        }, 280);
+    } else {
+        outgoing.classList.add('hidden');
+        outgoing.classList.remove('section-exit');
+    }
+
+    incoming.classList.remove('hidden');
+    if (animate) {
+        incoming.classList.remove('section-enter');
+        void incoming.offsetWidth;
+        incoming.classList.add('section-enter');
+    } else {
+        incoming.classList.remove('section-enter');
+    }
+
+    if (section === 'investment') {
+        syncPortfolioFromHoldings(false);
+    }
+
+    incoming.querySelectorAll('.scroll-reveal:not(.revealed)').forEach(el => {
+        requestAnimationFrame(() => el.classList.add('revealed'));
+    });
 
     if (save) {
         saveToLocalStorage();
@@ -828,6 +878,31 @@ function calculateHoldingTotal(quantity, price) {
     return qty * prc;
 }
 
+function getHoldingsGrandTotal() {
+    return state.holdings.reduce((sum, h) => {
+        return sum + calculateHoldingTotal(h.quantity, h.price);
+    }, 0);
+}
+
+function syncPortfolioFromHoldings(animate = true) {
+    const grandTotal = getHoldingsGrandTotal();
+    const formatted = grandTotal > 0 ? grandTotal.toFixed(2) : '';
+
+    if (portfolioInput.value !== formatted) {
+        portfolioInput.value = formatted;
+        state.portfolioValue = formatted;
+        invalidateResults();
+        saveToLocalStorage();
+
+        if (animate && formatted) {
+            portfolioInput.classList.remove('input-synced');
+            void portfolioInput.offsetWidth;
+            portfolioInput.classList.add('input-synced');
+            setTimeout(() => portfolioInput.classList.remove('input-synced'), 1200);
+        }
+    }
+}
+
 function renderHoldingsTable() {
     holdingsTbody.innerHTML = '';
 
@@ -839,17 +914,20 @@ function renderHoldingsTable() {
                 </td>
             </tr>
         `;
-        holdingsGrandTotal.textContent = 'INR 0.00';
+        animateHoldingsTotal(0);
+        syncPortfolioFromHoldings();
         return;
     }
 
     let grandTotal = 0;
 
-    state.holdings.forEach((h) => {
+    state.holdings.forEach((h, idx) => {
         const rowTotal = calculateHoldingTotal(h.quantity, h.price);
         grandTotal += rowTotal;
 
         const tr = document.createElement('tr');
+        tr.classList.add('row-reveal');
+        tr.style.animationDelay = `${Math.min(idx, 8) * 0.06}s`;
         tr.innerHTML = `
             <td class="serial-cell">${escapeHtml(h.serialNumber)}</td>
             <td>
@@ -900,7 +978,37 @@ function renderHoldingsTable() {
         holdingsTbody.appendChild(tr);
     });
 
-    holdingsGrandTotal.textContent = formatCurrency(grandTotal);
+    animateHoldingsTotal(grandTotal);
+    syncPortfolioFromHoldings();
+}
+
+function animateHoldingsTotal(endVal) {
+    if (!holdingsGrandTotal) return;
+    const startVal = parseFloat(holdingsGrandTotal.getAttribute('data-val') || '0');
+    holdingsGrandTotal.setAttribute('data-val', endVal);
+
+    if (startVal === endVal) {
+        holdingsGrandTotal.textContent = formatCurrency(endVal);
+        return;
+    }
+
+    holdingsGrandTotal.classList.add('total-updating');
+    const duration = 800;
+    const startTime = performance.now();
+
+    function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = startVal + (endVal - startVal) * eased;
+        holdingsGrandTotal.textContent = formatCurrency(current);
+        if (progress < 1) {
+            requestAnimationFrame(tick);
+        } else {
+            holdingsGrandTotal.textContent = formatCurrency(endVal);
+            holdingsGrandTotal.classList.remove('total-updating');
+        }
+    }
+    requestAnimationFrame(tick);
 }
 
 function addNewHolding() {
@@ -944,7 +1052,8 @@ function handleHoldingInput(e) {
         state.holdings.forEach(h => {
             grandTotal += calculateHoldingTotal(h.quantity, h.price);
         });
-        holdingsGrandTotal.textContent = formatCurrency(grandTotal);
+        animateHoldingsTotal(grandTotal);
+        syncPortfolioFromHoldings();
     }
 
     saveToLocalStorage();
@@ -964,6 +1073,238 @@ function handleHoldingDeleteClick(e) {
     renderHoldingsTable();
     saveToLocalStorage();
     showToast(`Removed "${name}" from holdings.`, 'info');
+}
+
+// ==========================================================================
+// Premium Animation Utilities
+// ==========================================================================
+
+function init3DTilt() {
+    document.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const tiltY = ((x - centerX) / centerX) * 4;
+        const tiltX = -((y - centerY) / centerY) * 4;
+        
+        card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-6px) scale(1.01)`;
+    });
+    
+    document.addEventListener('mouseout', (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        
+        const rect = card.getBoundingClientRect();
+        if (
+            e.clientX < rect.left || 
+            e.clientX > rect.right || 
+            e.clientY < rect.top || 
+            e.clientY > rect.bottom
+        ) {
+            card.style.transform = '';
+        }
+    });
+}
+
+function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.scroll-reveal, .stat-card').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Immediately reveal elements already in viewport
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.scroll-reveal, .stat-card').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                el.classList.add('revealed');
+            }
+        });
+    });
+}
+
+function initSpotlightTracking() {
+    document.addEventListener('mousemove', (e) => {
+        const target = e.target.closest('.card, .stat-card');
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        target.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        target.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    });
+}
+
+function initNavIndicator() {
+    updateNavIndicator();
+}
+
+function updateNavIndicator() {
+    const nav = document.querySelector('.app-nav');
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (!nav || !activeTab) return;
+
+    let indicator = nav.querySelector('.nav-indicator');
+    if (!indicator) {
+        indicator = document.createElement('span');
+        indicator.className = 'nav-indicator';
+        nav.prepend(indicator);
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    const tabRect = activeTab.getBoundingClientRect();
+    indicator.style.width = `${tabRect.width}px`;
+    indicator.style.transform = `translateX(${tabRect.left - navRect.left - 5}px)`;
+}
+
+function initPageEntrance() {
+    document.querySelector('.app-container')?.classList.add('page-loaded');
+    document.querySelectorAll('.stat-card').forEach((card, i) => {
+        card.style.transitionDelay = `${0.1 + i * 0.08}s`;
+    });
+    initParticleField();
+    window.addEventListener('resize', updateNavIndicator);
+}
+
+function initParticleField() {
+    const field = document.querySelector('.particle-field');
+    if (!field) return;
+
+    const count = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 24;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'particle';
+        const size = 1 + Math.random() * 2.5;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.animationDuration = `${12 + Math.random() * 18}s`;
+        p.style.animationDelay = `${Math.random() * 15}s`;
+        field.appendChild(p);
+    }
+}
+
+function initButtonRipples() {
+    document.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn');
+        if (!button) return;
+        
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple-element');
+        
+        const size = Math.max(rect.width, rect.height) * 2.5;
+        ripple.style.width = `${size}px`;
+        ripple.style.height = `${size}px`;
+        ripple.style.left = `${x - size / 2}px`;
+        ripple.style.top = `${y - size / 2}px`;
+        
+        button.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+}
+
+function triggerSparkleBurst(element) {
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2 + window.scrollX;
+    const centerY = rect.top + rect.height / 2 + window.scrollY;
+    
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+        const sparkle = document.createElement('span');
+        sparkle.classList.add('sparkle-element');
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * 80;
+        const destX = Math.cos(angle) * distance;
+        const destY = Math.sin(angle) * distance;
+        
+        sparkle.style.setProperty('--x', `${destX}px`);
+        sparkle.style.setProperty('--y', `${destY}px`);
+        
+        const size = 6 + Math.random() * 8;
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        
+        sparkle.style.left = `${centerX - size / 2}px`;
+        sparkle.style.top = `${centerY - size / 2}px`;
+        
+        document.body.appendChild(sparkle);
+        
+        setTimeout(() => {
+            sparkle.remove();
+        }, 1200);
+    }
+}
+
+function animateCountUp(element, endVal) {
+    if (!element) return;
+    const startVal = parseFloat(element.getAttribute('data-val') || '0');
+    element.setAttribute('data-val', endVal);
+    
+    const duration = 1200;
+    const startTime = performance.now();
+    
+    function updateNumber(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = progress * (2 - progress);
+        const currentVal = startVal + (endVal - startVal) * easeProgress;
+        
+        element.textContent = formatCurrency(currentVal);
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        } else {
+            element.textContent = formatCurrency(endVal);
+        }
+    }
+    requestAnimationFrame(updateNumber);
+}
+
+function animateCountUpInt(element, endVal) {
+    if (!element) return;
+    const startVal = parseInt(element.getAttribute('data-val') || '0', 10);
+    element.setAttribute('data-val', endVal);
+    
+    const duration = 800;
+    const startTime = performance.now();
+    
+    function updateNumber(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = progress * (2 - progress);
+        const currentVal = Math.round(startVal + (endVal - startVal) * easeProgress);
+        
+        element.textContent = currentVal;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        } else {
+            element.textContent = endVal;
+        }
+    }
+    requestAnimationFrame(updateNumber);
 }
 
 // Start application
