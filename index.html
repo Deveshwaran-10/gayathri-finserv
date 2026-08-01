@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gayatri Finserv</title>
+    <title>Gayathri Finserv</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,8 +14,10 @@
     <div class="ambient-glow bg-glow-1"></div>
     <div class="ambient-glow bg-glow-2"></div>
     <div class="ambient-glow bg-glow-3"></div>
+    <div class="mesh-gradient" aria-hidden="true"></div>
+    <div class="particle-field" aria-hidden="true"></div>
 
-    <div class="app-container">
+    <div class="app-container premium-ui">
         <!-- Toast Notification Area -->
         <div id="toast-container" class="toast-container"></div>
 
@@ -24,7 +26,7 @@
             <div class="header-logo">
                 <img src="logo.png" alt="GAYATRI FINSERV Logo" class="brand-logo">
                 <div class="header-text">
-                    <h1>GAYATRI FINSERV</h1>
+                    <h1>GAYATHRI FINSERV</h1>
                     <p>Crypto Investment & Management</p>
                 </div>
             </div>
@@ -113,7 +115,7 @@
                         <div class="form-actions">
                             <button type="button" id="btn-calculate" class="btn btn-primary btn-glow">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                Calculate Profit
+                                Calculate P/L
                             </button>
                             <button type="button" id="btn-undo-rollover" class="btn btn-outline hidden">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
@@ -133,7 +135,7 @@
                 
                 <!-- Stats Row -->
                 <div class="stats-grid">
-                    <div class="stat-card glass-card">
+                    <div class="stat-card glass-card scroll-reveal">
                         <div class="stat-info">
                             <span class="stat-label">Total Members</span>
                             <span class="stat-value" id="stat-total-members">-</span>
@@ -143,7 +145,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card glass-card">
+                    <div class="stat-card glass-card scroll-reveal">
                         <div class="stat-info">
                             <span class="stat-label">Total Investment</span>
                             <span class="stat-value text-blue" id="stat-total-investment">-</span>
@@ -153,7 +155,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card glass-card">
+                    <div class="stat-card glass-card scroll-reveal">
                         <div class="stat-info">
                             <span class="stat-label">Current Portfolio</span>
                             <span class="stat-value text-purple" id="stat-current-portfolio">-</span>
@@ -163,9 +165,9 @@
                         </div>
                     </div>
 
-                    <div class="stat-card glass-card">
+                    <div class="stat-card glass-card scroll-reveal">
                         <div class="stat-info">
-                            <span class="stat-label">Total Profit</span>
+                            <span class="stat-label">Net Profit / Loss</span>
                             <span class="stat-value text-green" id="stat-total-profit">-</span>
                         </div>
                         <div class="stat-icon-wrapper color-green">
@@ -173,7 +175,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card glass-card double-width">
+                    <div class="stat-card glass-card double-width scroll-reveal">
                         <div class="stat-meta-split">
                             <div class="stat-meta-item">
                                 <span class="stat-label">Highest Investor</span>
@@ -192,14 +194,14 @@
                 </div>
 
                 <!-- Results Details Card -->
-                <div class="card glass-card results-card inactive" id="results-display-card">
+                <div class="card glass-card results-card inactive scroll-reveal" id="results-display-card">
                     <div class="card-header">
                         <div class="card-title-area">
                             <span class="icon-wrapper">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             </span>
                             <div>
-                                <h2>Calculated Profit Sharing</h2>
+                                <h2>Calculated P/L Sharing</h2>
                                 <p class="card-subtitle">Ownership percentages, profits, and new valuations</p>
                             </div>
                         </div>
@@ -210,7 +212,7 @@
                         <div class="calc-placeholder" id="results-placeholder">
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                             <h3>Awaiting Calculations</h3>
-                            <p>Fill out the investments, enter the current portfolio value, and click "Calculate Profit" to generate distributions.</p>
+                            <p>Fill out the investments, enter the current portfolio value, and click "Calculate P/L" to generate distributions.</p>
                         </div>
 
                         <div class="results-table-area hidden" id="results-table-area">
@@ -249,7 +251,7 @@
 
         <!-- HOLDINGS Section -->
         <section class="app-section hidden" id="section-holdings">
-            <div class="card glass-card holdings-card">
+            <div class="card glass-card holdings-card scroll-reveal">
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="icon-wrapper">
