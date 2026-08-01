@@ -1811,6 +1811,7 @@ tr:hover .member-name-cell {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+   
     
     .double-width {
         grid-column: span 1;
