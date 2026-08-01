@@ -1282,7 +1282,6 @@ function animateCountUp(element, endVal) {
     requestAnimationFrame(updateNumber);
 }
 
-
 function animateCountUpInt(element, endVal) {
     if (!element) return;
     const startVal = parseInt(element.getAttribute('data-val') || '0', 10);
