@@ -1114,6 +1114,7 @@ tr:hover {
     100% { transform: translate(var(--x), var(--y)) scale(1.2); opacity: 0; }
 }
 
+
 /* Skeleton Loading Shimmer */
 .skeleton-row td {
     color: transparent !important;
