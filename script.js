@@ -262,6 +262,7 @@ function showToast(message, type = 'info') {
         ${iconSvg}
         <div class="toast-message">${escapeHtml(message)}</div>
         <button type="button" class="toast-close">&times;</button>
+        <div class="toast-progress"></div>
     `;
     
     container.appendChild(toast);
@@ -425,7 +426,21 @@ function handleDeleteClick(e) {
     const btn = e.target.closest('.btn-delete');
     if (btn) {
         const id = btn.dataset.id;
-        deleteMember(id);
+        const tr = btn.closest('tr');
+        if (tr) {
+            tr.classList.add('row-exit');
+            tr.addEventListener('animationend', () => {
+                deleteMember(id);
+            }, { once: true });
+            // Fallback in case animation doesn't fire
+            setTimeout(() => {
+                if (state.members.some(m => m.id === id)) {
+                    deleteMember(id);
+                }
+            }, 350);
+        } else {
+            deleteMember(id);
+        }
     }
 }
 
@@ -671,6 +686,8 @@ function calculateProfit() {
     // Reveal Undo Rollover button
     btnUndoRollover.classList.remove('hidden');
 
+    triggerSparklineRedraw();
+
     showToast("Calculations completed. Final amounts automatically rolled over as new investment inputs.", "success");
 }
 
@@ -858,6 +875,7 @@ function switchSection(section, save = true, animate = true) {
     if (save) {
         saveToLocalStorage();
     }
+    triggerSparklineRedraw();
 }
 
 // ==========================================================================
@@ -1064,20 +1082,48 @@ function handleHoldingDeleteClick(e) {
     if (!btn) return;
 
     const id = btn.dataset.holdingId;
-    const index = state.holdings.findIndex(h => h.id === id);
-    if (index === -1) return;
+    const tr = btn.closest('tr');
+    
+    const performDelete = () => {
+        const index = state.holdings.findIndex(h => h.id === id);
+        if (index === -1) return;
 
-    const name = state.holdings[index].coinName || `Entry #${state.holdings[index].serialNumber}`;
-    state.holdings.splice(index, 1);
+        const name = state.holdings[index].coinName || `Entry #${state.holdings[index].serialNumber}`;
+        state.holdings.splice(index, 1);
 
-    renderHoldingsTable();
-    saveToLocalStorage();
-    showToast(`Removed "${name}" from holdings.`, 'info');
+        renderHoldingsTable();
+        saveToLocalStorage();
+        showToast(`Removed "${name}" from holdings.`, 'info');
+    };
+
+    if (tr) {
+        tr.classList.add('row-exit');
+        tr.addEventListener('animationend', () => {
+            performDelete();
+        }, { once: true });
+        // Fallback in case animation doesn't fire
+        setTimeout(() => {
+            if (state.holdings.some(h => h.id === id)) {
+                performDelete();
+            }
+        }, 350);
+    } else {
+        performDelete();
+    }
 }
 
 // ==========================================================================
 // Premium Animation Utilities
 // ==========================================================================
+
+function triggerSparklineRedraw() {
+    const paths = document.querySelectorAll('.stat-sparkline path');
+    paths.forEach(path => {
+        path.style.animation = 'none';
+        void path.offsetHeight; // force reflow
+        path.style.animation = '';
+    });
+}
 
 function init3DTilt() {
     document.addEventListener('mousemove', (e) => {
@@ -1281,7 +1327,6 @@ function animateCountUp(element, endVal) {
     }
     requestAnimationFrame(updateNumber);
 }
-
 
 function animateCountUpInt(element, endVal) {
     if (!element) return;
