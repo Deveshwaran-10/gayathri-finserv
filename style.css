@@ -1473,7 +1473,8 @@ input[type="date"]:focus {
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
+   
     .double-width {
         grid-column: span 1;
     }
